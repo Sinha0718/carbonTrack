@@ -10,6 +10,7 @@ import com.carbontrack.security.UserPrincipal;
 import jakarta.validation.Valid;
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -71,7 +72,7 @@ public class ActivityController {
             @RequestParam(required = false) ActivityCategory category,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
-            @PageableDefault(size = 20, sort = {"logDate", "id"}, direction = Sort.Direction.DESC) Pageable pageable) {
+            @ParameterObject @PageableDefault(size = 20, sort = {"logDate", "id"}, direction = Sort.Direction.DESC) Pageable pageable) {
         return PageResponse.from(activityLogService.list(principal.getId(), category, from, to, pageable));
     }
 

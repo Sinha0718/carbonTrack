@@ -108,6 +108,21 @@ class ActivityIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
+    void unknownEnumValueReportsFieldError() throws Exception {
+        postActivity("transport", "{\"mode\":\"NOT_A_MODE\",\"distanceKm\":10}")
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.fieldErrors.mode").value(org.hamcrest.Matchers.startsWith("must be one of [")));
+    }
+
+    @Test
+    void unknownSortPropertyIsBadRequest() throws Exception {
+        mockMvc.perform(get("/api/activities").param("sort", "[\"string\"]")
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("Invalid sort property")));
+    }
+
+    @Test
     void loggingRequiresAuthentication() throws Exception {
         mockMvc.perform(post("/api/activities/food").contentType(MediaType.APPLICATION_JSON)
                         .content("{\"mealType\":\"BEEF\",\"servings\":1}"))

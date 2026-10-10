@@ -3,9 +3,13 @@ package com.carbontrack.common;
 import com.carbontrack.emission.UnknownEmissionFactorException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
+import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -38,7 +42,24 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ApiError> handleUnreadable(HttpMessageNotReadableException ex, HttpServletRequest request) {
+        if (ex.getCause() instanceof InvalidFormatException invalid && !invalid.getPath().isEmpty()) {
+            String field = invalid.getPath().stream()
+                    .map(ref -> ref.getFieldName() != null ? ref.getFieldName() : "[" + ref.getIndex() + "]")
+                    .collect(Collectors.joining("."));
+            Class<?> target = invalid.getTargetType();
+            String message = target != null && target.isEnum()
+                    ? "must be one of " + Arrays.toString(target.getEnumConstants())
+                    : "invalid value";
+            ApiError body = new ApiError(Instant.now(), 400, "Bad Request", "Validation failed",
+                    request.getRequestURI(), Map.of(field, message));
+            return ResponseEntity.badRequest().body(body);
+        }
         return build(HttpStatus.BAD_REQUEST, "Malformed request body or unsupported value", request);
+    }
+
+    @ExceptionHandler(PropertyReferenceException.class)
+    public ResponseEntity<ApiError> handlePropertyReference(PropertyReferenceException ex, HttpServletRequest request) {
+        return build(HttpStatus.BAD_REQUEST, "Invalid sort property '" + ex.getPropertyName() + "'", request);
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
