@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CarbonTrack - Module 1 Demo</title>
+<link rel="icon" href="data:,">
+<style>
+  :root { --green:#1f8a4c; --green-dark:#166c3b; --bg:#f3f7f4; --card:#fff; --text:#1d2b22; --muted:#6b7c70; --red:#c0392b; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; background:var(--bg); color:var(--text); }
+  header { background:var(--green); color:#fff; padding:16px 24px; display:flex; align-items:center; justify-content:space-between; }
+  header h1 { margin:0; font-size:22px; }
+  header small { opacity:.85; }
+  header a { color:#fff; margin-left:16px; font-size:14px; }
+  main { max-width:1000px; margin:24px auto; padding:0 16px; }
+  .card { background:var(--card); border-radius:10px; box-shadow:0 1px 4px rgba(0,0,0,.08); padding:20px; margin-bottom:20px; }
+  .card h2 { margin:0 0 14px; font-size:18px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px; }
+  label { display:block; font-size:13px; color:var(--muted); margin-bottom:4px; }
+  input, select { width:100%; padding:9px 10px; border:1px solid #cfd9d2; border-radius:6px; font-size:14px; }
+  button { background:var(--green); color:#fff; border:0; border-radius:6px; padding:10px 16px; font-size:14px; cursor:pointer; }
+  button:hover { background:var(--green-dark); }
+  button.secondary { background:#e4ece6; color:var(--text); }
+  button.link { background:none; color:var(--red); padding:4px 8px; }
+  .tabs button { margin-right:8px; }
+  .tabs button.active { box-shadow:inset 0 -3px 0 #0b4d27; }
+  .msg { margin-top:12px; padding:10px; border-radius:6px; font-size:14px; display:none; white-space:pre-wrap; }
+  .msg.error { display:block; background:#fdecea; color:var(--red); }
+  .msg.ok { display:block; background:#e6f4ea; color:var(--green-dark); }
+  .stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; }
+  .stat { background:var(--bg); border-radius:8px; padding:14px; }
+  .stat .v { font-size:24px; font-weight:700; }
+  .stat .l { font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; }
+  .bar { height:8px; background:#dfe8e2; border-radius:4px; margin-top:8px; overflow:hidden; }
+  .bar > div { height:100%; background:var(--green); }
+  table { width:100%; border-collapse:collapse; font-size:14px; }
+  th, td { text-align:left; padding:8px 6px; border-bottom:1px solid #edf1ee; }
+  th { color:var(--muted); font-weight:600; font-size:12px; text-transform:uppercase; }
+  .pill { font-size:11px; padding:2px 8px; border-radius:10px; background:#e4ece6; }
+  .hidden { display:none; }
+  .row { display:flex; gap:12px; align-items:end; flex-wrap:wrap; }
+  footer { text-align:center; color:var(--muted); font-size:12px; padding:20px; }
+</style>
+</head>
+<body>
+<header>
+  <div><h1>CarbonTrack</h1><small>Module 1 - activity logging &amp; emission calculation</small></div>
+  <div>
+    <span id="whoami"></span>
+    <a href="/swagger-ui.html" target="_blank">API docs (Swagger)</a>
+    <a href="#" id="logoutLink" class="hidden">Log out</a>
+  </div>
+</header>
+
+<main>
+  <section id="authCard" class="card">
+    <div class="tabs">
+      <button id="tabLogin" class="active">Log in</button>
+      <button id="tabRegister" class="secondary">Register</button>
+    </div>
+    <form id="loginForm" class="grid" style="margin-top:16px">
+      <div><label>Email</label><input name="email" type="email" required></div>
+      <div><label>Password</label><input name="password" type="password" required></div>
+      <div style="align-self:end"><button type="submit">Log in</button></div>
+    </form>
+    <form id="registerForm" class="grid hidden" style="margin-top:16px">
+      <div><label>Username</label><input name="username" required minlength="3"></div>
+      <div><label>Email</label><input name="email" type="email" required></div>
+      <div><label>Password (min 8 chars)</label><input name="password" type="password" required minlength="8"></div>
+      <div><label>Display name</label><input name="displayName"></div>
+      <div style="align-self:end"><button type="submit">Create account</button></div>
+    </form>
+    <div id="authMsg" class="msg"></div>
+  </section>
+
+  <div id="app" class="hidden">
+    <section class="card">
+      <h2>Your footprint</h2>
+      <div class="stats" id="stats"></div>
+    </section>
+
+    <section class="card">
+      <h2>Log an activity</h2>
+      <form id="activityForm" class="row">
+        <div style="flex:1;min-width:150px"><label>Category</label>
+          <select id="category"></select></div>
+        <div style="flex:1;min-width:180px"><label>Type</label>
+          <select id="type"></select></div>
+        <div style="flex:1;min-width:140px"><label id="qtyLabel">Quantity</label>
+          <input id="quantity" type="number" step="any" required></div>
+        <div style="flex:1;min-width:150px"><label>Date</label>
+          <input id="logDate" type="date"></div>
+        <div style="flex:2;min-width:180px"><label>Notes</label>
+          <input id="notes" maxlength="500"></div>
+        <div><button type="submit">Calculate &amp; save</button></div>
+      </form>
+      <div id="activityMsg" class="msg"></div>
+    </section>
+
+    <section class="card">
+      <h2>Activity history</h2>
+      <table>
+        <thead><tr><th>Date</th><th>Category</th><th>Type</th><th>Quantity</th><th>Factor (kg/unit)</th><th>kg CO2e</th><th></th></tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+      <p id="empty" style="color:var(--muted)">No activities yet. Log one above.</p>
+    </section>
+  </div>
+</main>
+<footer>CarbonTrack Module 1 demo - Spring Boot REST API + JWT + database-driven emission factors</footer>
+
+<script>
+const CATEGORIES = {
+  TRANSPORT:   { path:'transport',   typeField:'mode',            qtyField:'distanceKm',  qtyLabel:'Distance (km)',
+                 types:['CAR_PETROL','CAR_DIESEL','CAR_HYBRID','CAR_ELECTRIC','MOTORBIKE','BUS','TRAIN','METRO','FLIGHT_DOMESTIC','FLIGHT_SHORT_HAUL','FLIGHT_LONG_HAUL','BICYCLE','WALK'] },
+  ELECTRICITY: { path:'electricity', typeField:'energySource',    qtyField:'kwh',         qtyLabel:'Energy (kWh)',
+                 types:['GRID_AVERAGE','COAL','NATURAL_GAS','SOLAR','WIND','HYDRO','NUCLEAR'] },
+  FOOD:        { path:'food',        typeField:'mealType',        qtyField:'servings',    qtyLabel:'Servings',
+                 types:['BEEF','LAMB','PORK','CHICKEN','FISH','VEGETARIAN','VEGAN'] },
+  SHOPPING:    { path:'shopping',    typeField:'productCategory', qtyField:'spendAmount', qtyLabel:'Spend (USD)',
+                 types:['CLOTHING','ELECTRONICS','FURNITURE','HOUSEHOLD_GOODS','BOOKS_AND_MEDIA','PERSONAL_CARE','TOYS_AND_SPORTS'] }
+};
+const $ = id => document.getElementById(id);
+const pretty = s => s.replace(/_/g,' ').toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
+let token = localStorage.getItem('ct_token');
+
+async function api(method, url, body) {
+  const headers = { 'Content-Type':'application/json' };
+  if (token) headers.Authorization = 'Bearer ' + token;
+  const res = await fetch(url, { method, headers, body: body ? JSON.stringify(body) : undefined });
+  if (res.status === 401 && token && !url.startsWith('/api/auth')) { logout(); throw new Error('Session expired, please log in again'); }
+  const text = await res.text();
+  const data = text ? JSON.parse(text) : null;
+  if (!res.ok) {
+    const details = data && data.fieldErrors ? Object.entries(data.fieldErrors).map(([k,v]) => `${k}: ${v}`).join('\n') : '';
+    throw new Error((data && data.message ? data.message : res.statusText) + (details ? '\n' + details : ''));
+  }
+  return data;
+}
+function show(el, text, ok) { el.textContent = text; el.className = 'msg ' + (ok ? 'ok' : 'error'); }
+function clear(el) { el.className = 'msg'; }
+
+function setTab(login) {
+  $('loginForm').classList.toggle('hidden', !login);
+  $('registerForm').classList.toggle('hidden', login);
+  $('tabLogin').className = login ? 'active' : 'secondary';
+  $('tabRegister').className = login ? 'secondary' : 'active';
+  clear($('authMsg'));
+}
+$('tabLogin').onclick = () => setTab(true);
+$('tabRegister').onclick = () => setTab(false);
+
+function onAuth(resp) {
+  token = resp.accessToken;
+  localStorage.setItem('ct_token', token);
+  init();
+}
+$('loginForm').onsubmit = async e => {
+  e.preventDefault();
+  const f = new FormData(e.target);
+  try { onAuth(await api('POST','/api/auth/login', Object.fromEntries(f))); }
+  catch (err) { show($('authMsg'), err.message); }
+};
+$('registerForm').onsubmit = async e => {
+  e.preventDefault();
+  const f = Object.fromEntries(new FormData(e.target));
+  if (!f.displayName) delete f.displayName;
+  try { onAuth(await api('POST','/api/auth/register', f)); }
+  catch (err) { show($('authMsg'), err.message); }
+};
+function logout() {
+  token = null; localStorage.removeItem('ct_token');
+  $('app').classList.add('hidden'); $('authCard').classList.remove('hidden');
+  $('logoutLink').classList.add('hidden'); $('whoami').textContent = '';
+}
+$('logoutLink').onclick = e => { e.preventDefault(); logout(); };
+
+function fillTypes() {
+  const c = CATEGORIES[$('category').value];
+  $('type').innerHTML = c.types.map(t => `<option value="${t}">${pretty(t)}</option>`).join('');
+  $('qtyLabel').textContent = c.qtyLabel;
+}
+$('category').innerHTML = Object.keys(CATEGORIES).map(k => `<option value="${k}">${pretty(k)}</option>`).join('');
+$('category').onchange = fillTypes;
+fillTypes();
+$('logDate').max = new Date().toISOString().slice(0,10);
+
+$('activityForm').onsubmit = async e => {
+  e.preventDefault();
+  const c = CATEGORIES[$('category').value];
+  const body = { [c.typeField]: $('type').value, [c.qtyField]: $('quantity').value };
+  if ($('logDate').value) body.logDate = $('logDate').value;
+  if ($('notes').value) body.notes = $('notes').value;
+  try {
+    const r = await api('POST', '/api/activities/' + c.path, body);
+    show($('activityMsg'), `Saved: ${r.quantity} ${r.unit} x ${r.kgCo2ePerUnit} kg/${r.unit} = ${r.co2eKg} kg CO2e\nSource: ${r.factorSource}`, true);
+    $('quantity').value = ''; $('notes').value = '';
+    loadActivities();
+  } catch (err) { show($('activityMsg'), err.message); }
+};
+
+async function del(id) {
+  if (!confirm('Delete this activity?')) return;
+  try { await api('DELETE', '/api/activities/' + id); loadActivities(); }
+  catch (err) { show($('activityMsg'), err.message); }
+}
+
+async function loadActivities() {
+  const page = await api('GET', '/api/activities?size=100');
+  const logs = page.content;
+  $('rows').innerHTML = logs.map(l => `<tr>
+      <td>${l.logDate}</td><td><span class="pill">${pretty(l.category)}</span></td><td>${pretty(l.activityType)}</td>
+      <td>${l.quantity} ${l.unit}</td><td>${l.kgCo2ePerUnit ?? '-'}</td><td><b>${l.co2eKg}</b></td>
+      <td><button class="link" onclick="del(${l.id})">Delete</button></td></tr>`).join('');
+  $('empty').classList.toggle('hidden', logs.length > 0);
+  const totals = { TRANSPORT:0, ELECTRICITY:0, FOOD:0, SHOPPING:0 };
+  logs.forEach(l => totals[l.category] += Number(l.co2eKg));
+  const total = Object.values(totals).reduce((a,b) => a+b, 0);
+  $('stats').innerHTML = `<div class="stat"><div class="l">Total</div><div class="v">${total.toFixed(2)}</div><div class="l">kg CO2e - ${page.totalElements} entries</div></div>` +
+    Object.entries(totals).map(([k,v]) => `<div class="stat"><div class="l">${pretty(k)}</div><div class="v">${v.toFixed(2)}</div>
+      <div class="bar"><div style="width:${total ? (v/total*100).toFixed(1) : 0}%"></div></div></div>`).join('');
+}
+
+async function init() {
+  if (!token) return;
+  try {
+    const me = await api('GET', '/api/users/me');
+    $('whoami').textContent = 'Signed in as ' + (me.displayName || me.username) + (me.role === 'ADMIN' ? ' (admin)' : '');
+    $('authCard').classList.add('hidden'); $('app').classList.remove('hidden'); $('logoutLink').classList.remove('hidden');
+    await loadActivities();
+  } catch (err) { logout(); show($('authMsg'), err.message); }
+}
+init();
+</script>
+</body>
+</html>

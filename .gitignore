@@ -7,7 +7,11 @@ target/
 # IDE
 .idea/
 *.iml
-.vscode/
+.vscode/*
+!.vscode/launch.json
+!.vscode/tasks.json
+!.vscode/settings.json
+!.vscode/extensions.json
 .classpath
 .project
 .settings/
@@ -17,3 +21,6 @@ target/
 
 # Env
 .env
+
+# H2 demo database
+backend/data/

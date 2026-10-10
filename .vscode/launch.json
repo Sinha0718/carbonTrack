@@ -1,0 +1,23 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "java",
+      "name": "CarbonTrack (demo - no database setup)",
+      "request": "launch",
+      "mainClass": "com.carbontrack.CarbonTrackApplication",
+      "projectName": "carbontrack-backend",
+      "cwd": "${workspaceFolder}/backend",
+      "env": { "SPRING_PROFILES_ACTIVE": "demo" }
+    },
+    {
+      "type": "java",
+      "name": "CarbonTrack (PostgreSQL via docker compose)",
+      "request": "launch",
+      "mainClass": "com.carbontrack.CarbonTrackApplication",
+      "projectName": "carbontrack-backend",
+      "cwd": "${workspaceFolder}/backend",
+      "envFile": "${workspaceFolder}/.env"
+    }
+  ]
+}

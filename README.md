@@ -36,6 +36,29 @@ against the current official tables before relying on them in production.
 
 All four also accept optional `logDate` (ISO date, defaults to today, must not be in the future) and `notes` (≤ 500 chars).
 
+## Quick start in VS Code (no database setup)
+
+The `demo` profile runs on an embedded H2 database, so you only need **Java 17**. You don't need Docker or PostgreSQL. Flyway runs the same migrations and seed data.
+
+1. Install JDK 17 and VS Code, then open the repo root folder (`carbontrack/`) in VS Code.
+2. Install the recommended extensions when prompted (Extension Pack for Java, Spring Boot Extension Pack).
+3. Open **Run and Debug** (Ctrl+Shift+D), pick **CarbonTrack (demo - no database setup)** and press **F5**.
+   You can also run it from a terminal:
+   ```bash
+   cd backend
+   ./mvnw spring-boot:run -Dspring-boot.run.profiles=demo        # macOS/Linux
+   .\mvnw.cmd spring-boot:run "-Dspring-boot.run.profiles=demo"   # Windows
+   ```
+4. Open http://localhost:8080. A demo page lets you register or log in, log transport/electricity/food/shopping activities and see the calculated kg CO2e, with the factor and source used for each entry.
+
+Also available while it runs:
+- Swagger UI: http://localhost:8080/swagger-ui.html
+- Health: http://localhost:8080/actuator/health
+- H2 console: http://localhost:8080/h2-console (JDBC URL `jdbc:h2:file:./data/carbontrack-demo`, user `sa`, empty password)
+- Demo admin: `admin@carbontrack.local` / `Admin123!` (can manage emission factors under `/api/admin/**`)
+
+Demo data is saved in `backend/data/`. Delete that folder to start fresh. Running the tests (`./mvnw test`) still needs Docker, because the integration tests use Testcontainers PostgreSQL.
+
 ## Running locally
 
 Prerequisites: Java 17 and Docker. Maven comes through the wrapper.
