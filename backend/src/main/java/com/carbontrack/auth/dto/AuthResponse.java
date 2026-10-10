@@ -1,0 +1,10 @@
+package com.carbontrack.auth.dto;
+
+import com.carbontrack.user.dto.UserProfileResponse;
+
+public record AuthResponse(String accessToken, String tokenType, long expiresIn, UserProfileResponse user) {
+
+    public static AuthResponse bearer(String token, long expiresIn, UserProfileResponse user) {
+        return new AuthResponse(token, "Bearer", expiresIn, user);
+    }
+}
